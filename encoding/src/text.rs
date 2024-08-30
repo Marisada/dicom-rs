@@ -22,7 +22,7 @@
 //!
 //! These capabilities are available through [`SpecificCharacterSet`].
 
-use encoding::all::{GB18030, ISO_8859_1, ISO_8859_2, ISO_8859_3, ISO_8859_4, ISO_8859_5, UTF_8};
+use encoding::all::{GB18030, ISO_8859_1, ISO_8859_2, ISO_8859_3, ISO_8859_4, ISO_8859_5, UTF_8, WINDOWS_874};
 use encoding::{DecoderTrap, EncoderTrap, Encoding, RawDecoder, StringWriter};
 use snafu::{Backtrace, Snafu};
 use std::borrow::Cow;
@@ -202,6 +202,8 @@ enum CharsetImpl {
     IsoIr110,
     /// **ISO-IR 144** (ISO-8859-5): The Latin/Cyrillic character set.
     IsoIr144,
+    /// **ISO-IR 166**: (TIS-620): The Thai character set.
+    IsoIr166,
     /// **ISO-IR 192**: The Unicode character set based on the UTF-8 encoding.
     IsoIr192,
     /// **GB18030**: The Simplified Chinese character set.
@@ -223,6 +225,7 @@ impl CharsetImpl {
             "ISO_IR_109" | "ISO_IR 109" | "ISO 2022 IR 109" => Some(IsoIr109),
             "ISO_IR_110" | "ISO_IR 110" | "ISO 2022 IR 110" => Some(IsoIr110),
             "ISO_IR_144" | "ISO_IR 144" | "ISO 2022 IR 144" => Some(IsoIr144),
+            "ISO_IR_166" | "ISO_IR 166" | "ISO 2022 IR 166" => Some(IsoIr166),
             "ISO_IR_192" | "ISO_IR 192" => Some(IsoIr192),
             "GB18030" => Some(Gb18030),
             _ => None,
@@ -239,6 +242,7 @@ impl TextCodec for CharsetImpl {
             CharsetImpl::IsoIr109 => "ISO_IR 109",
             CharsetImpl::IsoIr110 => "ISO_IR 110",
             CharsetImpl::IsoIr144 => "ISO_IR 144",
+            CharsetImpl::IsoIr166 => "ISO_IR 166",
             CharsetImpl::IsoIr192 => "ISO_IR 192",
             CharsetImpl::Gb18030 => "GB18030",
         })
@@ -252,6 +256,7 @@ impl TextCodec for CharsetImpl {
             CharsetImpl::IsoIr109 => IsoIr109CharacterSetCodec.decode(text),
             CharsetImpl::IsoIr110 => IsoIr110CharacterSetCodec.decode(text),
             CharsetImpl::IsoIr144 => IsoIr144CharacterSetCodec.decode(text),
+            CharsetImpl::IsoIr166 => IsoIr166CharacterSetCodec.decode(text),
             CharsetImpl::IsoIr192 => Utf8CharacterSetCodec.decode(text),
             CharsetImpl::Gb18030 => Gb18030CharacterSetCodec.decode(text),
         }
@@ -265,6 +270,7 @@ impl TextCodec for CharsetImpl {
             CharsetImpl::IsoIr109 => IsoIr109CharacterSetCodec.encode(text),
             CharsetImpl::IsoIr110 => IsoIr110CharacterSetCodec.encode(text),
             CharsetImpl::IsoIr144 => IsoIr144CharacterSetCodec.encode(text),
+            CharsetImpl::IsoIr166 => IsoIr166CharacterSetCodec.encode(text),
             CharsetImpl::IsoIr192 => Utf8CharacterSetCodec.encode(text),
             CharsetImpl::Gb18030 => Gb18030CharacterSetCodec.encode(text),
         }
@@ -307,7 +313,7 @@ macro_rules! decl_character_set {
             }
 
             fn encode(&self, text: &str) -> EncodeResult<Vec<u8>> {
-                $val.encode(text, EncoderTrap::Strict)
+                $val.encode(text, EncoderTrap::Replace)
                     .map_err(|message| EncodeCustomSnafu { message }.build())
             }
         }
@@ -333,7 +339,7 @@ impl TextCodec for DefaultCharacterSetCodec {
 
     fn encode(&self, text: &str) -> EncodeResult<Vec<u8>> {
         ISO_8859_1
-            .encode(text, EncoderTrap::Strict)
+            .encode(text, EncoderTrap::Replace)
             .map_err(|message| EncodeCustomSnafu { message }.build())
     }
 }
@@ -343,6 +349,7 @@ decl_character_set!(IsoIr101CharacterSetCodec, "ISO_IR 101", ISO_8859_2);
 decl_character_set!(IsoIr109CharacterSetCodec, "ISO_IR 109", ISO_8859_3);
 decl_character_set!(IsoIr110CharacterSetCodec, "ISO_IR 110", ISO_8859_4);
 decl_character_set!(IsoIr144CharacterSetCodec, "ISO_IR 144", ISO_8859_5);
+decl_character_set!(IsoIr166CharacterSetCodec, "ISO_IR 166", WINDOWS_874);
 decl_character_set!(Utf8CharacterSetCodec, "ISO_IR 192", UTF_8);
 decl_character_set!(Gb18030CharacterSetCodec, "GB18030", GB18030);
 

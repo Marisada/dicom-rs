@@ -100,7 +100,7 @@ pub struct InMemDicomObject<D = StandardDataDictionary> {
     /// The length of the DICOM object in bytes.
     /// It is usually undefined, unless it is part of an item
     /// in a sequence with a specified length in its item header.
-    len: Length,
+    pub len: Length,
     /// In case the SpecificCharSet changes we need to mark the object as dirty,
     /// because changing the character set may change the length in bytes of
     /// stored text. It has to be public for now because we need

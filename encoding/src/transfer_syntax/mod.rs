@@ -508,6 +508,11 @@ impl<D, R, W> TransferSyntax<D, R, W> {
         &self.codec
     }
 
+    /// Obtain this transfer syntax' explicit of vr.
+    pub const fn explicit_vr(&self) -> bool {
+        self.explicit_vr
+    }
+
     /// Check whether this transfer syntax specifier provides a complete
     /// implementation,
     /// meaning that it can both decode and encode in this transfer syntax.
